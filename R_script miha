@@ -1,1 +1,131 @@
+```{r warning=FALSE, message=FALSE}
+rm(list = ls())
 
+# Importation de la base
+donnees <- read.csv("~/Desktop/Master 2025-2026/travel_recommendations.csv", stringsAsFactors = FALSE)
+View(donnees)
+
+# Fonction générique pour poser une question
+fonction_question <- function(question, options) {
+  cat("\n", question, "\n")
+  for (i in seq_along(options)) {
+    cat(i, ":", options[i], "\n")
+  }
+  choix <- as.integer(readline(prompt = "Votre choix (numéro) : "))
+  
+  if (is.na(choix) || choix < 1 || choix > length(options)) {
+    cat("Choix invalide. Veuillez réessayer.\n")
+    return(fonction_question(question, options))
+  }
+  return(options[choix])
+}
+
+# Fonction principale du jeu
+jeu_voyage <- function() {
+  cat("Bienvenue dans le jeu de recommandation de destination de voyage !\n")
+  
+  # Modalités DISTINCTES
+  category_ordre   <- unique(donnees$category)
+  companions_ordre <- unique(donnees$companions)
+  mois_ordre <- c("January","February","March","April","May","June",
+                  "July","August","September","October","November","December")
+  climate_ordre <- unique(donnees$climate)
+  crowd_ordre   <- unique(donnees$crowd_level)
+  activities_ordre <- unique(donnees$activities)
+  
+  # Questions
+  category_choisi <- fonction_question("Quel type de voyage souhaitez-vous faire ?", category_ordre)
+  companions_choisi <- fonction_question("Avec qui comptez-vous partir ?", companions_ordre)
+  mois_choisi <- fonction_question("Quel mois souhaitez-vous choisir pour votre voyage ?", mois_ordre)
+  climate_choisi <- fonction_question("Quel climat préférez-vous pour votre voyage ?", climate_ordre)
+  crowd_choisi <- fonction_question("Quel niveau de fréquentation touristique êtes-vous prêt(e) à accepter ?", crowd_ordre)
+  activities_choisie <- fonction_question("Quelle activité est la plus importante pour vous pendant ce voyage ?", activities_ordre)
+  
+  # Poids pour chaque critère
+  poids <- c(category=3, companions=2, month=2, climate=1, crowd=1, activities=3)
+  
+  # Calcul du score pour chaque ligne
+  donnees$score <- mapply(function(dest, cat, comp, mois, clim, crowd, act) {
+    score <- 0
+    if (any(cat == category_choisi)) score <- score + poids["category"]
+    if (any(comp == companions_choisi)) score <- score + poids["companions"]
+    if (any(grepl(mois_choisi, mois, ignore.case=TRUE))) score <- score + poids["month"]
+    if (any(clim == climate_choisi)) score <- score + poids["climate"]
+    if (any(crowd == crowd_choisi)) score <- score + poids["crowd"]
+    if (any(act == activities_choisie)) score <- score + poids["activities"]
+    return(score)
+  }, donnees$destination, donnees$category, donnees$companions, donnees$best_months,
+     donnees$climate, donnees$crowd_level, donnees$activities)
+  
+  # Agréger les scores par destination
+  scores <- aggregate(score ~ destination, data=donnees, sum)
+  
+  # Top 3 destinations
+  top3 <- head(scores[order(scores$score, decreasing=TRUE),], 3)
+  
+  # Affichage top 3 avec explication
+  cat("\nVoici votre top 3 des destinations :\n")
+  for (i in 1:nrow(top3)) {
+    dest <- top3$destination[i]
+    score <- top3$score[i]
+    cat("\n-", dest, "(Score:", score, ")\n")
+    
+    cat("  Correspondance :")
+    if (any(donnees$category[donnees$destination==dest]==category_choisi)) cat(" Type de voyage ✅")
+    if (any(donnees$companions[donnees$destination==dest]==companions_choisi)) cat(", Compagnons ✅")
+    if (any(grepl(mois_choisi, donnees$best_months[donnees$destination==dest], ignore.case=TRUE))) cat(", Mois ✅")
+    if (any(donnees$climate[donnees$destination==dest]==climate_choisi)) cat(", Climat ✅")
+    if (any(donnees$crowd_level[donnees$destination==dest]==crowd_choisi)) cat(", Fréquentation ✅")
+    if (any(donnees$activities[donnees$destination==dest]==activities_choisie)) cat(", Activité ✅")
+    
+    if ("link" %in% colnames(donnees)) {
+      cat("\n  Plus d'infos :", donnees$link[donnees$destination==dest])
+    }
+    cat("\n")
+  }
+  
+  cat("\nVotre destination idéale est :", top3$destination[1], "\n")
+  cat("Bon voyage ✈️🌍\n")
+  
+  # Option : prioriser 2 critères
+  cat("\nVoulez-vous prioriser certains critères pour votre destination ?\n")
+  cat("1: Non, le top 3 me suffit\n2: Oui, je veux prioriser 2 critères\n")
+  choix_priorite <- as.integer(readline(prompt="Votre choix : "))
+  
+  if (choix_priorite == 2) {
+    cat("\nChoisissez deux critères à respecter absolument :\n")
+    cat("1: Type de voyage\n2: Compagnons\n3: Mois\n4: Climat\n5: Niveau de fréquentation\n6: Activité\n")
+    critere1 <- as.integer(readline(prompt="Premier critère : "))
+    critere2 <- as.integer(readline(prompt="Deuxième critère : "))
+    
+    # Fonction pour vérifier les critères prioritaires
+    respecter_criteres <- function(dest) {
+      c1_ok <- if (critere1 == 1) any(donnees$category[donnees$destination==dest]==category_choisi) else
+               if (critere1 == 2) any(donnees$companions[donnees$destination==dest]==companions_choisi) else
+               if (critere1 == 3) any(grepl(mois_choisi, donnees$best_months[donnees$destination==dest], ignore.case=TRUE)) else
+               if (critere1 == 4) any(donnees$climate[donnees$destination==dest]==climate_choisi) else
+               if (critere1 == 5) any(donnees$crowd_level[donnees$destination==dest]==crowd_choisi) else
+               if (critere1 == 6) any(donnees$activities[donnees$destination==dest]==activities_choisie)
+      
+      c2_ok <- if (critere2 == 1) any(donnees$category[donnees$destination==dest]==category_choisi) else
+               if (critere2 == 2) any(donnees$companions[donnees$destination==dest]==companions_choisi) else
+               if (critere2 == 3) any(grepl(mois_choisi, donnees$best_months[donnees$destination==dest], ignore.case=TRUE)) else
+               if (critere2 == 4) any(donnees$climate[donnees$destination==dest]==climate_choisi) else
+               if (critere2 == 5) any(donnees$crowd_level[donnees$destination==dest]==crowd_choisi) else
+               if (critere2 == 6) any(donnees$activities[donnees$destination==dest]==activities_choisie)
+      
+      return(c1_ok & c2_ok)
+    }
+    
+    destinations_filtrees <- top3$destination[sapply(top3$destination, respecter_criteres)]
+    if (length(destinations_filtrees) > 0) {
+      cat("\nVotre top 1 respectant vos critères : ", destinations_filtrees[1], "\n")
+    } else {
+      cat("\nAucune destination ne respecte parfaitement vos critères, voici le top général.\n")
+    }
+  }
+}
+
+# Lancer le jeu
+jeu_voyage()
+```

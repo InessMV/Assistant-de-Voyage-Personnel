@@ -1,3 +1,10 @@
+---
+title: "VOYAGE"
+author: "RALANTOMALALA Kanto"
+date: "2026-01-07"
+output: html_document
+---
+
 ```{r warning=FALSE, message=FALSE}
 rm(list = ls())
 
@@ -5,7 +12,7 @@ rm(list = ls())
 donnees <- read.csv("~/Desktop/Master 2025-2026/travel_recommendations.csv", stringsAsFactors = FALSE)
 View(donnees)
 
-# Fonction généri5que pour poser une question à l'ulisateur
+# Fonction générique pour poser une question à l'ulisateur
 fonction_question <- function(question, options) {
   cat("\n", question, "\n")
     # Affiche la question 

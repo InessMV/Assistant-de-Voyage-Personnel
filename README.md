@@ -5,9 +5,9 @@ Une fois le script R et la base de donnéees installées, il suffit de lancer le
 
 Voici les facteurs utilisés pour notre Assistant de Voyage Personnel : 
 
-Le type de voyage répértoriant l'envie de la personne pour effectuer un voyage
-L'accompagnant afin de savoir si l'utilisateur aimerait partir seul ou à plusieurs pour peaufiner la recherche 
-Le mois de départ 
-Le climat souhaité 
-La fréquentation touristique 
-L'activitité favorite 
+- Le type de voyage répértoriant l'envie de la personne pour effectuer un voyage
+- L'accompagnant afin de savoir si l'utilisateur aimerait partir seul ou à plusieurs pour peaufiner la recherche 
+- Le mois de départ 
+- Le climat souhaité 
+- La fréquentation touristique 
+- L'activitité favorite 

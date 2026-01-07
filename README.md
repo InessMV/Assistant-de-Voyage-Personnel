@@ -6,9 +6,9 @@ Si vous voulez peaufiner davantage, un onglet apparait pour mentionner les deux 
 
 Voici les facteurs utilisés pour notre Assistant de Voyage Personnel : 
 
-- Le type de voyage répértoriant l'envie de la personne pour effectuer un voyage
-- L'accompagnant afin de savoir si l'utilisateur aimerait partir seul ou à plusieurs pour peaufiner la recherche 
-- Le mois de départ 
-- Le climat souhaité 
-- La fréquentation touristique 
-- L'activitité favorite 
+- Le type de voyage répértoriant le style et envie de la personne pour effectuer un voyage.
+- L'accompagnant afin de savoir si l'utilisateur aimerait partir seul ou à plusieurs pour peaufiner la recherche. 
+- Le mois de départ pour savoir quand est-ce que l'utilisateur souhaite partir en vacances.
+- Le climat souhaité pour déterminer la préfèrence de la personne.
+- La fréquentation touristique afin de connaitre la tolérance face aux nombres d'individus.
+- L'activitité favorite dans le but de connaitre ce que la personne aime faire en premier lieu.

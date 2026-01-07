@@ -1,16 +1,14 @@
-
 install.packages("shiny")
 install.packages("readr")
 install.packages("shinythemes")
 library(shiny)
-library(readr)
 library(shinythemes)
 
-# --- CHARGEMENT DES DONNÉES ---
-# Assurez-vous que le fichier est dans le même dossier que ce script
+# --- 1. CHARGEMENT DES DONNÉES ---
+# Note : Vérifiez que le fichier est bien dans le même dossier que ce script
 donnees <- read.csv("~/Library/CloudStorage/OneDrive-etu.unistra.fr/travel_recommendations.csv", stringsAsFactors = FALSE)
 
-# --- DICTIONNAIRES ---
+# --- 2. DICTIONNAIRES DE TRADUCTION ---
 trad_cat <- c("Aventure" = "adventure", "Plages" = "beaches", "Culture" = "culture", 
               "Désert" = "desert", "Forêt" = "forest", "Îles" = "islands", "Montagnes" = "mountains")
 trad_comp <- c("En couple" = "couple", "En famille" = "family", "Entre amis" = "friends", "Seul(e)" = "solo")
@@ -27,11 +25,11 @@ trad_act <- c("Balades en bateau" = "boat rides", "Promenades à chameau" = "cam
               "Snorkeling" = "snorkeling", "Baignade" = "swimming", "Trekking" = "trekking", 
               "Safari photo" = "wildlife safari")
 
-# --- INTERFACE UTILISATEUR ---
+# --- 3. INTERFACE UTILISATEUR (UI) ---
 ui <- fluidPage(
   theme = shinytheme("flatly"),
   
-  # Confettis à l'ouverture (comme dans votre exemple)
+  # Effet Confettis (comme dans votre exemple de films)
   tags$head(
     tags$script(src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"),
     tags$script(HTML("window.onload = function() { confetti({particleCount: 100, spread: 70, origin: { y: 0.6 }}); };"))
@@ -54,80 +52,87 @@ ui <- fluidPage(
     
     mainPanel(
       h3("🏝️ Nos suggestions pour vous :"),
+      # Zone de message d'erreur personnalisée si rien n'est trouvé
+      uiOutput("message_vide"),
       tableOutput("resultats"),
       
-      # Zone pour le filtre strict (apparaît après le premier calcul)
+      # Filtres prioritaires
       uiOutput("prio_ui")
     )
   )
 )
 
-# --- LOGIQUE SERVEUR ---
+# --- 4. LOGIQUE SERVEUR (SERVER) ---
 server <- function(input, output, session) {
   
-  # Stockage des résultats pour pouvoir les filtrer après
   valeurs <- reactiveValues(top_voyages = NULL, scores = NULL)
 
   observeEvent(input$go, {
-    # 1. Récupération et traduction des choix
-    req_cat <- trad_cat[input$cat]
+    # Traductions
+    req_cat  <- trad_cat[input$cat]
     req_comp <- trad_comp[input$comp]
     req_mois <- trad_mois[input$mois]
     req_clim <- trad_clim[input$clim]
     req_freq <- trad_frequent[input$freq]
-    req_act <- trad_act[input$act]
+    req_act  <- trad_act[input$act]
 
-    # 2. Calcul du Score (Même logique que votre script original)
+    # Calcul du Score
     scores <- rep(0, nrow(donnees))
-    scores <- scores + (donnees$category == req_cat)
-    scores <- scores + (donnees$companions == req_comp)
-    scores <- scores + (donnees$climate == req_clim)
-    scores <- scores + (donnees$crowd_level == req_freq)
-    scores <- scores + grepl(req_mois, donnees$best_months)
-    scores <- scores + grepl(req_act, donnees$activities)
+    scores <- scores + (tolower(donnees$category) == req_cat)
+    scores <- scores + (tolower(donnees$companions) == req_comp)
+    scores <- scores + (tolower(donnees$climate) == req_clim)
+    scores <- scores + (tolower(donnees$crowd_level) == req_freq)
+    scores <- scores + grepl(req_mois, donnees$best_months, ignore.case = TRUE)
+    scores <- scores + grepl(req_act, donnees$activities, ignore.case = TRUE)
     
-    # 3. Préparation du Top 3
+    # Sélection du Top 3
     top_indices <- order(scores, decreasing = TRUE)[1:3]
     res <- donnees[top_indices, ]
+    
+    # Ajout de la colonne adéquation proprement
     res$Adequation <- paste0(round((scores[top_indices] / 6) * 100), "%")
     
     valeurs$top_voyages <- res
     valeurs$scores <- scores
+    
+    # Petit effet de succès
+    showNotification("Destinations trouvées !", type = "message")
   })
 
-  # Affichage du tableau
+  # AFFICHAGE DU TABLEAU CORRIGÉ (Sans colonnes forcées)
   output$resultats <- renderTable({
     req(valeurs$top_voyages)
-    valeurs$top_voyages[, c("destination", "country", "category", "Adequation")]
+    # On affiche tout le tableau sélectionné sans nommer les colonnes à la main
+    # Cela évite l'erreur "undefined columns"
+    valeurs$top_voyages
   }, striped = TRUE, hover = TRUE, bordered = TRUE)
 
-  # UI pour les critères prioritaires (s'affiche seulement si on a déjà des résultats)
+  # UI des Filtres
   output$prio_ui <- renderUI({
     req(valeurs$top_voyages)
     tagList(
       hr(),
       h4("⚙️ Pas satisfait ? Imposez 2 critères prioritaires"),
       fluidRow(
-        column(6, selectInput("crit1", "Priorité 1", choices = c("Catégorie"=1, "Compagnons"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6))),
-        column(6, selectInput("crit2", "Priorité 2", choices = c("Catégorie"=1, "Compagnons"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6)))
+        column(6, selectInput("crit1", "Priorité 1", choices = list("Catégorie"=1, "Compagnons"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6))),
+        column(6, selectInput("crit2", "Priorité 2", choices = list("Catégorie"=1, "Compagnons"=2, "Mois"=3, "Climat"=4, "Fréquentation"=5, "Activité"=6)))
       ),
       actionButton("prio_btn", "Appliquer le filtre strict", class = "btn-warning"),
-      textOutput("prio_res")
+      br(), br(),
+      span(textOutput("prio_res"), style="font-weight:bold; font-size: 1.2em; color: #2c3e50;")
     )
   })
 
-  # Logique du filtre strict
   observeEvent(input$prio_btn, {
     req(valeurs$scores)
     
-    # Fonction de vérification (adaptée de votre script)
     verifier <- function(idx, num) {
-      if (num == 1) return(donnees$category[idx] == trad_cat[input$cat])
-      if (num == 2) return(donnees$companions[idx] == trad_comp[input$comp])
-      if (num == 3) return(grepl(trad_mois[input$mois], donnees$best_months[idx]))
-      if (num == 4) return(donnees$climate[idx] == trad_clim[input$clim])
-      if (num == 5) return(donnees$crowd_level[idx] == trad_frequent[input$freq])
-      if (num == 6) return(grepl(trad_act[input$act], donnees$activities[idx]))
+      if (num == 1) return(tolower(donnees$category[idx]) == trad_cat[input$cat])
+      if (num == 2) return(tolower(donnees$companions[idx]) == trad_comp[input$comp])
+      if (num == 3) return(grepl(trad_mois[input$mois], donnees$best_months[idx], ignore.case = TRUE))
+      if (num == 4) return(tolower(donnees$climate[idx]) == trad_clim[input$clim])
+      if (num == 5) return(tolower(donnees$crowd_level[idx]) == trad_frequent[input$freq])
+      if (num == 6) return(grepl(trad_act[input$act], donnees$activities[idx], ignore.case = TRUE))
       return(TRUE)
     }
 
@@ -137,9 +142,9 @@ server <- function(input, output, session) {
       if (any(strict)) {
         possibilites <- donnees[strict, ]
         best <- possibilites$destination[order(valeurs$scores[strict], decreasing = TRUE)[1]]
-        paste("La meilleure destination respectant strictement vos priorités est :", best)
+        paste("🌟 La meilleure destination respectant strictement vos priorités est :", best)
       } else {
-        "Désolé, aucune destination ne correspond à ces critères combinés."
+        "❌ Désolé, aucune destination ne correspond à ce mélange de critères."
       }
     })
   })

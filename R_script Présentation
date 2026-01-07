@@ -3,16 +3,14 @@ title: "Assistant de recommandation de voyages"
 author: "Kanto, Ines, Lucas"
 date: "2026-01-07"
 output:
-  slidy_presentation: default
-  beamer_presentation: default
   ioslides_presentation: default
+  beamer_presentation: default
+  slidy_presentation: default
 ---
-
 ## Contexte du projet
 
 - Projet réalisé sous **R** avec le package **Shiny**
-- Objectif : proposer des destinations de voyage personnalisées
-- Basé sur les préférences déclarées par l’utilisateur
+- Objectif : proposer des destinations de voyage personnalisées basé sur les préférences déclarées par l’utilisateur
 
 L’application agit comme un **outil d’aide à la décision interactif**.
 
@@ -25,7 +23,7 @@ library(shiny)
 library(shinythemes)
 
 ---
-## Données utilisées
+## Les données utilisées
 - Base de données contenant des destinations touristiques 
 - Variables principales :
   - catégorie de voyage ( aventure, culture, montagne,...)
@@ -56,9 +54,7 @@ L’utilisateur sélectionne :
 Ces choix constituent les **critères de recommandation**.
 
 ---
-
 ## Logique générale de l’application
-
 1. Traduction des préférences utilisateur
 2. Comparaison avec chaque destination
 3. Calcul d’un score
@@ -66,17 +62,13 @@ Ces choix constituent les **critères de recommandation**.
 5. Affichage des meilleurs résultats
 
 ---
-
 ## Méthode de scoring
-
 - Chaque critère respecté ajoute **1 point**
 - Score maximal possible : **6**
 - Tous les critères ont le même poids
 
 ---
-
 ## Sélection des destinations
-
 - Les destinations sont triées par score décroissant
 - Les **3 meilleures** sont conservées
 - Calcul d’un pourcentage d’adéquation :
@@ -87,7 +79,6 @@ Adéquation = \frac{score}{6} \times 100
 
 
 ---
-
 ## Affichage des résultats
 
 - Résultats présentés sous forme de tableau
@@ -95,7 +86,6 @@ Adéquation = \frac{score}{6} \times 100
 - Indicateur d’adéquation en pourcentage
 
 ---
-
 ## Fonctionnalité avancée
 
 Si l’utilisateur n’est pas satisfait :
@@ -103,12 +93,10 @@ Si l’utilisateur n’est pas satisfait :
 - ces critères deviennent stricts
 - seules les destinations respectant ces critères sont retenues
 
-
 ## Apports du projet
  Utilisation de **R Shiny**
 
 ---
-
 ## Limites du projet
 - Les résultats dépendent fortement de la **qualité et de la richesse de la base de données**.
 - Aucune **contrainte budgétaire ou géographique** n’est prise en compte.
@@ -122,6 +110,4 @@ Si l’utilisateur n’est pas satisfait :
 ---
 
 ## Conclusion
-L’application développée constitue un outil simple,
-personnalisable et évolutif d’aide à la décision.
-
+L’application développée constitue un outil simple, personnalisable et évolutif d’aide à la décision.

@@ -1,1 +1,127 @@
+---
+title: "Assistant de recommandation de voyages"
+author: "Kanto, Ines, Lucas"
+date: "2026-01-07"
+output:
+  slidy_presentation: default
+  beamer_presentation: default
+  ioslides_presentation: default
+---
+
+## Contexte du projet
+
+- Projet réalisé sous **R** avec le package **Shiny**
+- Objectif : proposer des destinations de voyage personnalisées
+- Basé sur les préférences déclarées par l’utilisateur
+
+L’application agit comme un **outil d’aide à la décision interactif**.
+
+---
+## Les packages et library utilisés 
+install.packages("shiny")
+install.packages("readr")
+install.packages("shinythemes")
+library(shiny)
+library(shinythemes)
+
+---
+## Données utilisées
+- Base de données contenant des destinations touristiques 
+- Variables principales :
+  - catégorie de voyage ( aventure, culture, montagne,...)
+  - accompagnants (en famille, en couple, seul(e) )
+  - climat (tropical, humide,...)
+  - niveau de fréquentation (calme, animé, modéré)
+  - mois idéaux
+  - activités proposées (visites de musées, baignade,...)
+  
+---
+## Problème linguistique
+- Interface utilisateur en **français**
+- Données stockées en **anglais**
+ Risque d’incohérence entre choix utilisateur et données 
+ Solution : création de dictionnaires detraduction 
+---
+
+## Choix des préférences
+
+L’utilisateur sélectionne :
+- type de voyage
+- accompagnants
+- mois de départ
+- climat préféré
+- fréquentation
+- activité favorite
+
+Ces choix constituent les **critères de recommandation**.
+
+---
+
+## Logique générale de l’application
+
+1. Traduction des préférences utilisateur
+2. Comparaison avec chaque destination
+3. Calcul d’un score
+4. Classement des destinations
+5. Affichage des meilleurs résultats
+
+---
+
+## Méthode de scoring
+
+- Chaque critère respecté ajoute **1 point**
+- Score maximal possible : **6**
+- Tous les critères ont le même poids
+
+---
+
+## Sélection des destinations
+
+- Les destinations sont triées par score décroissant
+- Les **3 meilleures** sont conservées
+- Calcul d’un pourcentage d’adéquation :
+  
+\[
+Adéquation = \frac{score}{6} \times 100
+\]
+
+
+---
+
+## Affichage des résultats
+
+- Résultats présentés sous forme de tableau
+- Affichage automatique des colonnes
+- Indicateur d’adéquation en pourcentage
+
+---
+
+## Fonctionnalité avancée
+
+Si l’utilisateur n’est pas satisfait :
+- possibilité d’imposer **2 critères prioritaires**
+- ces critères deviennent stricts
+- seules les destinations respectant ces critères sont retenues
+
+
+## Apports du projet
+ Utilisation de **R Shiny**
+
+---
+
+## Limites du projet
+- Les résultats dépendent fortement de la **qualité et de la richesse de la base de données**.
+- Aucune **contrainte budgétaire ou géographique** n’est prise en compte.
+- L’utilisateur ne peut sélectionner **qu’une seule option par critère**.
+- Il n’est pas possible d’être **indifférent** ou de ne pas exprimer de préférence.
+
+## Pistes d’amélioration
+- Intégration de **contraintes budgétaires** et de la **durée du séjour**.
+- **Enrichissement de la base de données** pour améliorer la pertinence des recommandations.
+- Proposition d’options de **transport ou de vols** adaptées à la destination.
+---
+
+## Conclusion
+L’application développée constitue un outil simple,
+personnalisable et évolutif d’aide à la décision.
 

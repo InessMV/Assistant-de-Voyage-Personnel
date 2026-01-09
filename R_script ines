@@ -4,19 +4,23 @@ author: "..."
 date: "2026-01-07"
 output: html_document
 ---
+tout d'abord il faut installer les 3 packages 
 
 ```{r}
-#install.packages("shiny")
-#install.packages("readr")
-#install.packages("shinythemes")
+install.packages("shiny")
+install.packages("readr")
+install.packages("shinythemes")
 library(shiny)
+library(readr)
 library(shinythemes)
+```
 
-# --- 1. CHARGEMENT DES DONNÉES ---
-# Note : Vérifiez que le fichier est bien dans le même dossier que ce script
+
+```{r}
+# 1. CHARGEMENT DES DONNÉES
 donnees <- read.csv("~/Library/CloudStorage/OneDrive-etu.unistra.fr/travel_recommendations.csv", stringsAsFactors = FALSE)
 
-# --- 2. DICTIONNAIRES DE TRADUCTION ---
+# 2. DICTIONNAIRES DE TRADUCTION
 trad_cat <- c("Aventure" = "adventure", "Plages" = "beaches", "Culture" = "culture", 
               "Désert" = "desert", "Forêt" = "forest", "Îles" = "islands", "Montagnes" = "mountains")
 trad_comp <- c("En couple" = "couple", "En famille" = "family", "Entre amis" = "friends", "Seul(e)" = "solo")
@@ -33,11 +37,11 @@ trad_act <- c("Balades en bateau" = "boat rides", "Promenades à chameau" = "cam
               "Snorkeling" = "snorkeling", "Baignade" = "swimming", "Trekking" = "trekking", 
               "Safari photo" = "wildlife safari")
 
-# --- 3. INTERFACE UTILISATEUR (UI) ---
+# 3. INTERFACE UTILISATEUR (UI) 
 ui <- fluidPage(
   theme = shinytheme("flatly"),
   
-  # Effet Confettis (comme dans votre exemple de films)
+  # Effet Confettis
   tags$head(
     tags$script(src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"),
     tags$script(HTML("window.onload = function() { confetti({particleCount: 100, spread: 70, origin: { y: 0.6 }}); };"))
@@ -70,7 +74,7 @@ ui <- fluidPage(
   )
 )
 
-# --- 4. LOGIQUE SERVEUR (SERVER) ---
+# 4. LOGIQUE SERVEUR (SERVER)
 server <- function(input, output, session) {
   
   valeurs <- reactiveValues(top_voyages = NULL, scores = NULL)
